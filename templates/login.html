@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In | Smart Recruitment System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card card-corporate shadow-sm">
+        <div class="card-header text-center bg-white py-3 border-bottom">
+          <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-right-to-bracket text-primary me-2"></i> Account Sign In</h4>
+          <small class="text-muted">Enter your registered email and password</small>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST" action="{{ url_for('main.login') }}">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-envelope"></i></span>
+                <input type="email" class="form-control" id="email" name="email" placeholder="name@company.com" required autofocus>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-lock"></i></span>
+                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+              <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Sign In
+            </button>
+          </form>
+        </div>
+        <div class="card-footer bg-light text-center py-3">
+          <span class="text-muted fs-7">Don't have an account yet?</span>
+          <a href="{{ url_for('main.register') }}" class="fw-bold text-primary text-decoration-none ms-1">Register Now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

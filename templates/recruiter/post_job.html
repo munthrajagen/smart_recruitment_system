@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Post New Job | Smart Recruitment System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="card card-corporate shadow-sm">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+          <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-plus-circle text-primary me-2"></i> Post a New Vacancy</h4>
+          <a href="{{ url_for('main.manage_jobs') }}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back to Jobs</a>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST" action="{{ url_for('main.post_job') }}">
+            
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="title" class="form-label">Job Title <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="title" name="title" placeholder="e.g. Senior Software Engineer" required>
+              </div>
+              <div class="col-md-6">
+                <label for="company" class="form-label">Company Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="company" name="company" placeholder="e.g. Acme Technologies Inc." required>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="location" name="location" placeholder="e.g. New York, NY / Hybrid" required>
+              </div>
+              <div class="col-md-4">
+                <label for="employment_type" class="form-label">Employment Type <span class="text-danger">*</span></label>
+                <select class="form-select" id="employment_type" name="employment_type" required>
+                  <option value="Full-Time" selected>Full-Time</option>
+                  <option value="Part-Time">Part-Time</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Remote">Remote</option>
+                  <option value="Internship">Internship</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="salary" class="form-label">Salary Package <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="salary" name="salary" placeholder="e.g. $90,000 - $120,000 / yr" required>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="experience" class="form-label">Experience Required <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="experience" name="experience" placeholder="e.g. 3-5 Years" required>
+              </div>
+              <div class="col-md-6">
+                <label for="last_date" class="form-label">Last Date to Apply <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="last_date" name="last_date" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="skills" class="form-label">Required Skills (Comma separated) <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="skills" name="skills" placeholder="e.g. Python, Flask, MySQL, JavaScript, HTML5" required>
+            </div>
+
+            <div class="mb-4">
+              <label for="description" class="form-label">Detailed Job Description <span class="text-danger">*</span></label>
+              <textarea class="form-control" id="description" name="description" rows="6" placeholder="Specify role responsibilities, team structure, qualifications, and benefits..." required></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <a href="{{ url_for('main.manage_jobs') }}" class="btn btn-secondary px-4">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-paper-plane me-1"></i> Publish Job</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

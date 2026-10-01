@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Profile | Smart Recruitment System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="card card-corporate shadow-sm">
+        <div class="card-header bg-white py-3 border-bottom">
+          <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-user-pen text-primary me-2"></i> Candidate Profile & Resume</h4>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST" action="{{ url_for('main.candidate_profile') }}" enctype="multipart/form-data">
+            
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-address-card text-secondary me-2"></i> Personal Information</h5>
+            
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ current_user.full_name }}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email Address (Account ID)</label>
+                <input type="email" class="form-control bg-light" id="email" value="{{ current_user.email }}" readonly disabled>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="text" class="form-control" id="phone" name="phone" value="{{ current_user.phone or '' }}" placeholder="+1 (555) 000-0000">
+              </div>
+              <div class="col-md-6">
+                <label for="address" class="form-label">Residential Address</label>
+                <input type="text" class="form-control" id="address" name="address" value="{{ current_user.address or '' }}" placeholder="City, State, Country">
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-graduation-cap text-secondary me-2"></i> Professional Qualifications</h5>
+
+            <div class="mb-3">
+              <label for="skills" class="form-label">Technical & Professional Skills</label>
+              <input type="text" class="form-control" id="skills" name="skills" value="{{ current_user.skills or '' }}" placeholder="e.g. Python, SQL, Project Management, Data Analysis">
+              <small class="text-muted">Separate multiple skills with commas.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="education" class="form-label">Education & Qualifications</label>
+              <textarea class="form-control" id="education" name="education" rows="3" placeholder="e.g. B.S. in Computer Science, University of Technology (2020-2024)...">{{ current_user.education or '' }}</textarea>
+            </div>
+
+            <div class="mb-4">
+              <label for="experience" class="form-label">Work Experience Overview</label>
+              <textarea class="form-control" id="experience" name="experience" rows="3" placeholder="e.g. 2 years as Junior Software Developer at TechCorp...">{{ current_user.experience or '' }}</textarea>
+            </div>
+
+            <hr class="my-4">
+
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-file-pdf text-secondary me-2"></i> Default Resume File</h5>
+
+            <div class="mb-4">
+              {% if current_user.resume_path %}
+                <div class="p-3 bg-light rounded border mb-3 d-flex justify-content-between align-items-center">
+                  <div>
+                    <i class="fa-solid fa-file-lines text-primary fs-4 me-2"></i>
+                    <span class="fw-bold text-dark">{{ current_user.resume_path }}</span>
+                  </div>
+                  <a href="{{ url_for('main.download_resume', filename=current_user.resume_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fa-solid fa-eye me-1"></i> Preview Saved Resume
+                  </a>
+                </div>
+              {% endif %}
+
+              <label for="resume" class="form-label">{% if current_user.resume_path %}Upload New Resume (Replaces current file){% else %}Upload Resume (PDF, DOC, DOCX){% endif %}</label>
+              <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.doc,.docx">
+              <small class="text-muted mt-1 d-block">Maximum allowed file size is 10 MB.</small>
+            </div>
+
+            <hr class="my-4">
+
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-key text-secondary me-2"></i> Security Settings</h5>
+            <div class="mb-4 col-md-6">
+              <label for="new_password" class="form-label">New Password (Leave blank to keep unchanged)</label>
+              <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Min 6 characters" minlength="6">
+            </div>
+
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-save me-1"></i> Update Candidate Profile</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications | Smart Recruitment System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">My Applications Tracker</h2>
+      <p class="text-muted mb-0">Monitor real-time recruitment status updates for your submitted applications.</p>
+    </div>
+    <a href="{{ url_for('main.browse_jobs') }}" class="btn btn-primary">
+      <i class="fa-solid fa-magnifying-glass me-1"></i> Find More Jobs
+    </a>
+  </div>
+
+  <div class="card card-corporate">
+    <div class="card-body p-0">
+      {% if applications %}
+      <div class="table-responsive">
+        <table class="table table-enterprise mb-0">
+          <thead>
+            <tr>
+              <th>Job Position</th>
+              <th>Company Name</th>
+              <th>Applied Date</th>
+              <th>Submitted Resume</th>
+              <th>Current Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in applications %}
+            <tr>
+              <td>
+                <a href="{{ url_for('main.job_details', job_id=app.job.id) }}" class="fw-bold text-primary text-decoration-none">
+                  {{ app.job.title }}
+                </a>
+              </td>
+              <td class="fw-semibold text-dark">{{ app.job.company }}</td>
+              <td>{{ app.applied_date.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td>
+                <a href="{{ url_for('main.download_resume', filename=app.resume) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                  <i class="fa-solid fa-file-arrow-down me-1"></i> Preview Resume
+                </a>
+              </td>
+              <td>
+                {% if app.status == 'Pending' %}
+                  <span class="badge badge-status badge-pending"><i class="fa-solid fa-clock me-1"></i> Pending Review</span>
+                {% elif app.status == 'Shortlisted' %}
+                  <span class="badge badge-status badge-shortlisted"><i class="fa-solid fa-star me-1"></i> Shortlisted</span>
+                {% elif app.status == 'Selected' %}
+                  <span class="badge badge-status badge-selected"><i class="fa-solid fa-circle-check me-1"></i> Selected / Offered</span>
+                {% elif app.status == 'Rejected' %}
+                  <span class="badge badge-status badge-rejected"><i class="fa-solid fa-ban me-1"></i> Application Closed</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{{ url_for('main.job_details', job_id=app.job.id) }}" class="btn btn-sm btn-outline-primary">
+                  View Job <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="fa-solid fa-file-circle-xmark fs-1 text-muted mb-3 d-block"></i>
+        <h5 class="fw-semibold text-dark">No Submitted Applications</h5>
+        <p class="text-muted mb-3">You haven't applied for any jobs yet.</p>
+        <a href="{{ url_for('main.browse_jobs') }}" class="btn btn-primary btn-sm">Explore Open Vacancies</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} at {{ job.company }} | Smart Recruitment System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      
+      <!-- Back Navigation -->
+      <a href="{{ url_for('main.browse_jobs') }}" class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="fa-solid fa-arrow-left me-1"></i> Back to Browse Jobs
+      </a>
+
+      <!-- Job Card Header -->
+      <div class="card card-corporate shadow-sm mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+            <div>
+              <span class="badge badge-status badge-job-type mb-2">{{ job.employment_type }}</span>
+              <h2 class="fw-bold text-dark mb-1">{{ job.title }}</h2>
+              <h5 class="text-primary fw-semibold mb-0"><i class="fa-solid fa-building me-2"></i> {{ job.company }}</h5>
+            </div>
+            
+            {% if existing_application %}
+              <div class="text-end">
+                <span class="badge badge-status badge-selected fs-6 py-2 px-3"><i class="fa-solid fa-check-circle me-1"></i> Applied</span>
+                <div class="text-muted fs-7 mt-1">Status: <strong>{{ existing_application.status }}</strong></div>
+              </div>
+            {% else %}
+              <a href="{{ url_for('main.apply_job', job_id=job.id) }}" class="btn btn-primary btn-lg px-4">
+                <i class="fa-solid fa-paper-plane me-2"></i> Apply Now
+              </a>
+            {% endif %}
+          </div>
+
+          <hr class="my-3">
+
+          <div class="row g-3 fs-7">
+            <div class="col-sm-6 col-md-3">
+              <div class="text-muted fw-semibold uppercase">LOCATION</div>
+              <div class="fw-bold text-dark"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ job.location }}</div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-muted fw-semibold uppercase">SALARY PACKAGE</div>
+              <div class="fw-bold text-dark"><i class="fa-solid fa-money-bill-wave me-1 text-success"></i> {{ job.salary }}</div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-muted fw-semibold uppercase">EXPERIENCE NEEDED</div>
+              <div class="fw-bold text-dark"><i class="fa-solid fa-briefcase me-1 text-info"></i> {{ job.experience }}</div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="text-muted fw-semibold uppercase">DEADLINE</div>
+              <div class="fw-bold text-dark"><i class="fa-solid fa-clock me-1 text-warning"></i> {{ job.last_date.strftime('%Y-%m-%d') }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Required -->
+      <div class="card card-corporate mb-4">
+        <div class="card-header bg-white py-3">
+          <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-tags text-primary me-2"></i> Required Skills</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="d-flex flex-wrap gap-2">
+            {% for skill in job.skills.split(',') %}
+              <span class="badge bg-light text-dark border py-2 px-3 fs-7">{{ skill.strip() }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Description -->
+      <div class="card card-corporate">
+        <div class="card-header bg-white py-3">
+          <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-align-left text-primary me-2"></i> Job Description & Requirements</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="lh-lg text-dark" style="white-space: pre-line;">
+            {{ job.description }}
+          </div>
+
+          <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+            <span class="text-muted fs-7">Posted on: {{ job.created_at.strftime('%B %d, %Y') }}</span>
+            
+            {% if not existing_application %}
+              <a href="{{ url_for('main.apply_job', job_id=job.id) }}" class="btn btn-primary px-4">
+                <i class="fa-solid fa-paper-plane me-1"></i> Submit Resume & Apply
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

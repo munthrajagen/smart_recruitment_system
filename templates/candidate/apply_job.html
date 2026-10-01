@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for {{ job.title }} | Smart Recruitment System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card card-corporate shadow-sm">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+          <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-paper-plane text-primary me-2"></i> Submit Application</h4>
+          <a href="{{ url_for('main.job_details', job_id=job.id) }}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back</a>
+        </div>
+        <div class="card-body p-4">
+          
+          <!-- Summary Banner -->
+          <div class="p-3 bg-light rounded border mb-4">
+            <h5 class="fw-bold text-dark mb-1">{{ job.title }}</h5>
+            <p class="text-primary fw-semibold mb-2"><i class="fa-solid fa-building me-1"></i> {{ job.company }} &bull; {{ job.location }}</p>
+            <span class="badge bg-secondary">Salary: {{ job.salary }}</span>
+          </div>
+
+          <form method="POST" action="{{ url_for('main.apply_job', job_id=job.id) }}" enctype="multipart/form-data">
+            
+            {% if current_user.resume_path %}
+              <div class="card p-3 border mb-4 bg-white">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="use_profile_resume" id="use_profile_resume" value="true" checked>
+                  <label class="form-check-label fw-bold text-dark" for="use_profile_resume">
+                    <i class="fa-solid fa-file-check text-success me-1"></i> Use existing resume from profile
+                  </label>
+                  <div class="small text-muted mt-1 ms-4">
+                    Current file: <strong>{{ current_user.resume_path }}</strong> 
+                    (<a href="{{ url_for('main.download_resume', filename=current_user.resume_path) }}" target="_blank">Preview</a>)
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+            <div class="mb-4">
+              <label for="resume" class="form-label fw-bold text-dark">
+                {% if current_user.resume_path %}Or Upload a New Resume{% else %}Upload Resume (PDF, DOC, DOCX) <span class="text-danger">*</span>{% endif %}
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-file-arrow-up"></i></span>
+                <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.doc,.docx" {% if not current_user.resume_path %}required{% endif %}>
+              </div>
+              <small class="text-muted mt-1 d-block">Supported file formats: PDF, DOC, DOCX. Maximum file size: 10 MB.</small>
+            </div>
+
+            <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+              <i class="fa-solid fa-circle-info fs-5 text-info"></i>
+              <div class="fs-7">
+                By submitting this application, your profile details (Name, Contact, Education, Skills) and resume will be shared with the recruiter at <strong>{{ job.company }}</strong>.
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <a href="{{ url_for('main.job_details', job_id=job.id) }}" class="btn btn-secondary px-4">Cancel</a>
+              <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-check me-1"></i> Submit Job Application</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

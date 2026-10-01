@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Jobs | Smart Recruitment System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="mb-4">
+    <h2 class="fw-bold text-dark mb-1">Browse Job Vacancies</h2>
+    <p class="text-muted mb-0">Search and filter open opportunities posted by top corporate employers.</p>
+  </div>
+
+  <!-- Search & Filter Controls Container -->
+  <div class="search-box-container">
+    <form method="GET" action="{{ url_for('main.browse_jobs') }}" class="row g-3">
+      
+      <!-- Keyword Search -->
+      <div class="col-lg-4">
+        <label for="q" class="form-label">Search Keyword</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+          <input type="text" class="form-control" id="q" name="q" value="{{ search_query }}" placeholder="Job title, skills, or company...">
+        </div>
+      </div>
+
+      <!-- Location Filter -->
+      <div class="col-md-4 col-lg-2">
+        <label for="location" class="form-label">Location</label>
+        <select name="location" id="location" class="form-select">
+          <option value="">All Locations</option>
+          {% for loc in locations %}
+            <option value="{{ loc }}" {% if location_filter == loc %}selected{% endif %}>{{ loc }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Employment Type Filter -->
+      <div class="col-md-4 col-lg-2">
+        <label for="type" class="form-label">Job Type</label>
+        <select name="type" id="type" class="form-select">
+          <option value="">All Types</option>
+          <option value="Full-Time" {% if job_type_filter == 'Full-Time' %}selected{% endif %}>Full-Time</option>
+          <option value="Part-Time" {% if job_type_filter == 'Part-Time' %}selected{% endif %}>Part-Time</option>
+          <option value="Contract" {% if job_type_filter == 'Contract' %}selected{% endif %}>Contract</option>
+          <option value="Remote" {% if job_type_filter == 'Remote' %}selected{% endif %}>Remote</option>
+          <option value="Internship" {% if job_type_filter == 'Internship' %}selected{% endif %}>Internship</option>
+        </select>
+      </div>
+
+      <!-- Company Filter -->
+      <div class="col-md-4 col-lg-2">
+        <label for="company" class="form-label">Company</label>
+        <select name="company" id="company" class="form-select">
+          <option value="">All Companies</option>
+          {% for comp in companies %}
+            <option value="{{ comp }}" {% if company_filter == comp %}selected{% endif %}>{{ comp }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="col-lg-2 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-filter me-1"></i> Filter</button>
+        <a href="{{ url_for('main.browse_jobs') }}" class="btn btn-outline-secondary" title="Reset Filters"><i class="fa-solid fa-rotate-left"></i></a>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Job Listings Grid -->
+  {% if jobs %}
+  <div class="row g-4">
+    {% for job in jobs %}
+    <div class="col-md-6">
+      <div class="card card-corporate h-100">
+        <div class="card-body d-flex flex-column justify-content-between p-4">
+          <div>
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="fw-bold text-dark mb-0 fs-5">{{ job.title }}</h5>
+              <span class="badge badge-status badge-job-type">{{ job.employment_type }}</span>
+            </div>
+            
+            <p class="text-primary fw-semibold mb-3 fs-7">
+              <i class="fa-solid fa-building me-1"></i> {{ job.company }}
+            </p>
+
+            <div class="row g-2 mb-3 fs-7 text-secondary">
+              <div class="col-6"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ job.location }}</div>
+              <div class="col-6"><i class="fa-solid fa-money-bill-wave me-1 text-success"></i> {{ job.salary }}</div>
+              <div class="col-6"><i class="fa-solid fa-briefcase me-1 text-info"></i> {{ job.experience }} Exp.</div>
+              <div class="col-6"><i class="fa-solid fa-calendar me-1 text-warning"></i> Apply by {{ job.last_date.strftime('%Y-%m-%d') }}</div>
+            </div>
+
+            <div class="mb-3">
+              <small class="text-muted d-block mb-1 font-monospace">Required Skills:</small>
+              <div>
+                {% for skill in job.skills.split(',') %}
+                  <span class="badge bg-light text-dark border me-1 mb-1">{{ skill.strip() }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+            {% if job.id in applied_job_ids %}
+              <span class="badge badge-status badge-selected"><i class="fa-solid fa-check-circle me-1"></i> Applied</span>
+              <a href="{{ url_for('main.job_details', job_id=job.id) }}" class="btn btn-sm btn-outline-secondary">View Details</a>
+            {% else %}
+              <a href="{{ url_for('main.job_details', job_id=job.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+              <a href="{{ url_for('main.apply_job', job_id=job.id) }}" class="btn btn-sm btn-primary">
+                <i class="fa-solid fa-paper-plane me-1"></i> Apply Now
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card card-corporate p-5 text-center">
+    <i class="fa-solid fa-magnifying-glass-minus fs-1 text-muted mb-3"></i>
+    <h5 class="fw-bold text-dark">No Matching Jobs Found</h5>
+    <p class="text-muted mb-3">Try adjusting your search criteria or resetting the filters.</p>
+    <a href="{{ url_for('main.browse_jobs') }}" class="btn btn-primary btn-sm mx-auto" style="width: fit-content;">Clear Search Filters</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
