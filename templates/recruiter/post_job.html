@@ -21,7 +21,7 @@
               </div>
               <div class="col-md-6">
                 <label for="company" class="form-label">Company Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="company" name="company" placeholder="e.g. Acme Technologies Inc." required>
+                <input type="text" class="form-control bg-light" id="company" name="company" value="{{ current_user.company_name or '' }}" placeholder="Company Name" required readonly>
               </div>
             </div>
 
@@ -47,11 +47,15 @@
             </div>
 
             <div class="row g-3 mb-3">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label for="experience" class="form-label">Experience Required <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="experience" name="experience" placeholder="e.g. 3-5 Years" required>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
+                <label for="openings" class="form-label">Number of Openings <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="openings" name="openings" value="1" min="1" required>
+              </div>
+              <div class="col-md-4">
                 <label for="last_date" class="form-label">Last Date to Apply <span class="text-danger">*</span></label>
                 <input type="date" class="form-control" id="last_date" name="last_date" required>
               </div>
@@ -63,7 +67,7 @@
             </div>
 
             <div class="mb-4">
-              <label for="description" class="form-label">Detailed Job Description <span class="text-danger">*</span></label>
+              <label for="description" class="form-label">Detailed Job Description & Qualifications <span class="text-danger">*</span></label>
               <textarea class="form-control" id="description" name="description" rows="6" placeholder="Specify role responsibilities, team structure, qualifications, and benefits..." required></textarea>
             </div>
 

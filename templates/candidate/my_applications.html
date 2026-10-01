@@ -24,6 +24,7 @@
               <th>Job Position</th>
               <th>Company Name</th>
               <th>Applied Date</th>
+              <th>Last Updated</th>
               <th>Submitted Resume</th>
               <th>Current Status</th>
               <th class="text-end">Action</th>
@@ -37,22 +38,35 @@
                   {{ app.job.title }}
                 </a>
               </td>
-              <td class="fw-semibold text-dark">{{ app.job.company }}</td>
+              <td class="fw-semibold text-dark">{{ app.job.display_company }}</td>
               <td>{{ app.applied_date.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td>{{ app.updated_at.strftime('%Y-%m-%d %H:%M') if app.updated_at else app.applied_date.strftime('%Y-%m-%d %H:%M') }}</td>
               <td>
                 <a href="{{ url_for('main.download_resume', filename=app.resume) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                   <i class="fa-solid fa-file-arrow-down me-1"></i> Preview Resume
                 </a>
               </td>
               <td>
-                {% if app.status == 'Pending' %}
-                  <span class="badge badge-status badge-pending"><i class="fa-solid fa-clock me-1"></i> Pending Review</span>
+                {% if app.status == 'Applied' %}
+                  <span class="badge badge-status badge-job-type"><i class="fa-solid fa-paper-plane me-1"></i> Applied</span>
+                {% elif app.status == 'Under Review' %}
+                  <span class="badge badge-status badge-pending"><i class="fa-solid fa-magnifying-glass me-1"></i> Under Review</span>
                 {% elif app.status == 'Shortlisted' %}
                   <span class="badge badge-status badge-shortlisted"><i class="fa-solid fa-star me-1"></i> Shortlisted</span>
+                {% elif app.status == 'Interview' %}
+                  <span class="badge bg-info text-white"><i class="fa-solid fa-comments me-1"></i> Interview Scheduled</span>
                 {% elif app.status == 'Selected' %}
                   <span class="badge badge-status badge-selected"><i class="fa-solid fa-circle-check me-1"></i> Selected / Offered</span>
                 {% elif app.status == 'Rejected' %}
                   <span class="badge badge-status badge-rejected"><i class="fa-solid fa-ban me-1"></i> Application Closed</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ app.status }}</span>
+                {% endif %}
+
+                {% if app.status == 'Rejected' and app.rejection_reason %}
+                  <div class="alert alert-danger py-2 px-3 mt-2 mb-0 border-0 fs-7">
+                    <strong><i class="fa-solid fa-circle-xmark me-1"></i> Rejection Reason:</strong> {{ app.rejection_reason }}
+                  </div>
                 {% endif %}
               </td>
               <td class="text-end">

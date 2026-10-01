@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Recruiter Profile | Smart Recruitment System{% endblock %}
+{% block title %}Recruiter & Company Profile | Smart Recruitment System{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -8,11 +8,13 @@
     <div class="col-lg-8">
       <div class="card card-corporate shadow-sm">
         <div class="card-header bg-white py-3 border-bottom">
-          <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-id-card text-primary me-2"></i> Recruiter Profile Settings</h4>
+          <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-id-card text-primary me-2"></i> Recruiter & Company Profile</h4>
         </div>
         <div class="card-body p-4">
           <form method="POST" action="{{ url_for('main.recruiter_profile') }}">
             
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-user me-2 text-secondary"></i> Recruiter Personal Information</h5>
+
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
@@ -24,32 +26,52 @@
               </div>
             </div>
 
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label for="phone" class="form-label">Contact Phone Number</label>
                 <input type="text" class="form-control" id="phone" name="phone" value="{{ current_user.phone or '' }}" placeholder="+1 (555) 000-0000">
               </div>
               <div class="col-md-6">
-                <label for="role" class="form-label">System Authorization Role</label>
-                <input type="text" class="form-control bg-light text-capitalize" id="role" value="{{ current_user.role }}" readonly disabled>
+                <label for="address" class="form-label">Contact Address</label>
+                <input type="text" class="form-control" id="address" name="address" value="{{ current_user.address or '' }}" placeholder="Personal contact address">
               </div>
-            </div>
-
-            <div class="mb-4">
-              <label for="address" class="form-label">Company / Office Address</label>
-              <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter corporate address details...">{{ current_user.address or '' }}</textarea>
             </div>
 
             <hr class="my-4">
 
-            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-key text-secondary me-2"></i> Change Password</h5>
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-building me-2 text-secondary"></i> Company Details</h5>
+
+            <div class="mb-3">
+              <label for="company_name" class="form-label">Company Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="company_name" name="company_name" value="{{ current_user.company_name or '' }}" required placeholder="e.g. ABC Technologies">
+            </div>
+
+            <div class="mb-3">
+              <label for="company_description" class="form-label">Company Description <span class="text-danger">*</span></label>
+              <textarea class="form-control" id="company_description" name="company_description" rows="4" required placeholder="About the company...">{{ current_user.company_description or '' }}</textarea>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="company_location" class="form-label">Company Location</label>
+                <input type="text" class="form-control" id="company_location" name="company_location" value="{{ current_user.company_location or '' }}" placeholder="e.g. Chennai, India">
+              </div>
+              <div class="col-md-6">
+                <label for="company_website" class="form-label">Company Website</label>
+                <input type="text" class="form-control" id="company_website" name="company_website" value="{{ current_user.company_website or '' }}" placeholder="e.g. www.abctechnologies.com">
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-key text-secondary me-2"></i> Security Settings</h5>
             <div class="mb-4 col-md-6">
               <label for="new_password" class="form-label">New Password (Leave blank to keep current)</label>
               <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Min 6 characters" minlength="6">
             </div>
 
             <div class="d-flex justify-content-end">
-              <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-save me-1"></i> Save Profile Changes</button>
+              <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-save me-1"></i> Save Profile & Company Changes</button>
             </div>
 
           </form>

@@ -5,26 +5,26 @@
 {% block content %}
 <div class="container py-4">
   <div class="row justify-content-center">
-    <div class="col-md-7 col-lg-6">
+    <div class="col-md-8 col-lg-7">
       <div class="card card-corporate shadow-sm">
         <div class="card-header text-center bg-white py-3 border-bottom">
           <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-user-plus text-primary me-2"></i> Register Account</h4>
           <small class="text-muted">Choose your role and set up your enterprise credentials</small>
         </div>
         <div class="card-body p-4">
-          <form method="POST" action="{{ url_for('main.register') }}">
+          <form method="POST" action="{{ url_for('main.register') }}" id="registerForm">
             
             <div class="mb-3">
               <label class="form-label">I am registering as: <span class="text-danger">*</span></label>
               <div class="row g-2">
                 <div class="col-6">
-                  <input type="radio" class="btn-check" name="role" id="role_candidate" value="candidate" checked>
+                  <input type="radio" class="btn-check" name="role" id="role_candidate" value="candidate" checked onchange="toggleRoleFields()">
                   <label class="btn btn-outline-primary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" for="role_candidate">
                     <i class="fa-solid fa-user-graduate"></i> Candidate
                   </label>
                 </div>
                 <div class="col-6">
-                  <input type="radio" class="btn-check" name="role" id="role_recruiter" value="recruiter">
+                  <input type="radio" class="btn-check" name="role" id="role_recruiter" value="recruiter" onchange="toggleRoleFields()">
                   <label class="btn btn-outline-secondary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" for="role_recruiter">
                     <i class="fa-solid fa-building"></i> Recruiter
                   </label>
@@ -45,6 +45,32 @@
               <div class="input-group">
                 <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-envelope"></i></span>
                 <input type="email" class="form-control" id="email" name="email" placeholder="john@example.com" required>
+              </div>
+            </div>
+
+            <!-- Recruiter Company Fields Section (Dynamically shown) -->
+            <div id="companyFieldsSection" class="p-3 bg-light rounded border mb-3" style="display: none;">
+              <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-building text-primary me-2"></i> Company Information</h6>
+              
+              <div class="mb-3">
+                <label for="company_name" class="form-label">Company Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="company_name" name="company_name" placeholder="e.g. ABC Technologies">
+              </div>
+
+              <div class="mb-3">
+                <label for="company_description" class="form-label">Company Description <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="company_description" name="company_description" rows="3" placeholder="Brief description of your company..."></textarea>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="company_location" class="form-label">Company Location</label>
+                  <input type="text" class="form-control" id="company_location" name="company_location" placeholder="e.g. Chennai / Remote">
+                </div>
+                <div class="col-md-6">
+                  <label for="company_website" class="form-label">Company Website</label>
+                  <input type="text" class="form-control" id="company_website" name="company_website" placeholder="e.g. www.abctechnologies.com">
+                </div>
               </div>
             </div>
 
@@ -78,4 +104,24 @@
     </div>
   </div>
 </div>
+
+<script>
+function toggleRoleFields() {
+  const isRecruiter = document.getElementById('role_recruiter').checked;
+  const companySection = document.getElementById('companyFieldsSection');
+  const compName = document.getElementById('company_name');
+  const compDesc = document.getElementById('company_description');
+
+  if (isRecruiter) {
+    companySection.style.display = 'block';
+    compName.setAttribute('required', 'required');
+    compDesc.setAttribute('required', 'required');
+  } else {
+    companySection.style.display = 'none';
+    compName.removeAttribute('required');
+    compDesc.removeAttribute('required');
+  }
+}
+document.addEventListener('DOMContentLoaded', toggleRoleFields);
+</script>
 {% endblock %}

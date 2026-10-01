@@ -72,9 +72,17 @@ def register():
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
         role = request.form.get('role', 'candidate')
+        company_name = request.form.get('company_name', '').strip()
+        company_description = request.form.get('company_description', '').strip()
+        company_location = request.form.get('company_location', '').strip()
+        company_website = request.form.get('company_website', '').strip()
 
         if not full_name or not email or not password or not role:
             flash('Please fill in all required fields.', 'warning')
+            return render_template('register.html')
+
+        if role == 'recruiter' and (not company_name or not company_description):
+            flash('Company Name and Company Description are required for Recruiter registration.', 'warning')
             return render_template('register.html')
 
         if password != confirm_password:
@@ -93,7 +101,11 @@ def register():
         user = User(
             full_name=full_name,
             email=email,
-            role=role
+            role=role,
+            company_name=company_name if role == 'recruiter' else None,
+            company_description=company_description if role == 'recruiter' else None,
+            company_location=company_location if role == 'recruiter' else None,
+            company_website=company_website if role == 'recruiter' else None
         )
         user.set_password(password)
 
@@ -178,7 +190,8 @@ def recruiter_dashboard():
 def post_job():
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
-        company = request.form.get('company', '').strip()
+        # Auto-set company from recruiter's profile, fallback to form input if provided
+        company = current_user.company_name or request.form.get('company', '').strip()
         location = request.form.get('location', '').strip()
         employment_type = request.form.get('employment_type', 'Full-Time')
         salary = request.form.get('salary', '').strip()
@@ -186,6 +199,7 @@ def post_job():
         skills = request.form.get('skills', '').strip()
         description = request.form.get('description', '').strip()
         last_date_str = request.form.get('last_date', '')
+        openings = request.form.get('openings', 1, type=int)
 
         if not all([title, company, location, salary, experience, skills, description, last_date_str]):
             flash('All job fields are required.', 'warning')
@@ -207,7 +221,9 @@ def post_job():
             experience=experience,
             skills=skills,
             description=description,
-            last_date=last_date
+            last_date=last_date,
+            openings=openings,
+            is_active=True
         )
 
         db.session.add(new_job)
@@ -224,23 +240,34 @@ def manage_jobs():
     jobs = Job.query.filter_by(recruiter_id=current_user.id).order_by(Job.created_at.desc()).all()
     return render_template('recruiter/manage_jobs.html', jobs=jobs)
 
+@main.route('/recruiter/toggle-job-status/<int:job_id>', methods=['POST'])
+@recruiter_required
+def toggle_job_status(job_id):
+    job = Job.query.filter_by(id=job_id, recruiter_id=current_user.id).first_or_404()
+    job.is_active = not job.is_active
+    db.session.commit()
+    status_str = "reopened" if job.is_active else "closed/deactivated"
+    flash(f'Job "{job.title}" has been {status_str}.', 'success')
+    return redirect(url_for('main.manage_jobs'))
+
 @main.route('/recruiter/edit-job/<int:job_id>', methods=['GET', 'POST'])
 @recruiter_required
 def edit_job(job_id):
-    job = Job.query.get_or_404(job_id)
-    if job.recruiter_id != current_user.id:
-        flash('Unauthorized action.', 'danger')
-        return redirect(url_for('main.manage_jobs'))
+    # Enforce strict recruiter authorization check
+    job = Job.query.filter_by(id=job_id, recruiter_id=current_user.id).first_or_404()
 
     if request.method == 'POST':
         job.title = request.form.get('title', '').strip()
-        job.company = request.form.get('company', '').strip()
+        job.company = current_user.company_name or request.form.get('company', '').strip() or job.company
         job.location = request.form.get('location', '').strip()
         job.employment_type = request.form.get('employment_type', 'Full-Time')
         job.salary = request.form.get('salary', '').strip()
         job.experience = request.form.get('experience', '').strip()
         job.skills = request.form.get('skills', '').strip()
         job.description = request.form.get('description', '').strip()
+        job.openings = request.form.get('openings', job.openings, type=int)
+        if 'is_active' in request.form:
+            job.is_active = request.form.get('is_active') == 'true'
         
         last_date_str = request.form.get('last_date', '')
         if last_date_str:
@@ -259,10 +286,8 @@ def edit_job(job_id):
 @main.route('/recruiter/delete-job/<int:job_id>', methods=['POST'])
 @recruiter_required
 def delete_job(job_id):
-    job = Job.query.get_or_404(job_id)
-    if job.recruiter_id != current_user.id:
-        flash('Unauthorized action.', 'danger')
-        return redirect(url_for('main.manage_jobs'))
+    # Enforce strict recruiter authorization check
+    job = Job.query.filter_by(id=job_id, recruiter_id=current_user.id).first_or_404()
 
     db.session.delete(job)
     db.session.commit()
@@ -302,15 +327,26 @@ def update_application_status(app_id):
         return redirect(url_for('main.view_applications'))
 
     new_status = request.form.get('status', '').strip()
-    valid_statuses = ['Pending', 'Shortlisted', 'Selected', 'Rejected']
+    valid_statuses = ['Applied', 'Under Review', 'Shortlisted', 'Interview', 'Selected', 'Rejected', 'Pending']
 
-    if new_status in valid_statuses:
-        app_item.status = new_status
-        db.session.commit()
-        flash(f'Application status updated to "{new_status}" for {app_item.candidate.full_name}.', 'success')
-    else:
+    if new_status not in valid_statuses:
         flash('Invalid status provided.', 'danger')
+        return redirect(url_for('main.view_applications', job_id=request.args.get('job_id')))
 
+    if new_status == 'Rejected':
+        rejection_reason = request.form.get('rejection_reason', '').strip()
+        if not rejection_reason:
+            flash('Rejection reason is required.', 'danger')
+            return redirect(url_for('main.view_applications', job_id=request.args.get('job_id')))
+        app_item.rejection_reason = rejection_reason
+    else:
+        app_item.rejection_reason = None
+
+    app_item.status = new_status
+    app_item.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    flash(f'Application status updated to "{new_status}" for {app_item.candidate.full_name}.', 'success')
     return redirect(url_for('main.view_applications', job_id=request.args.get('job_id')))
 
 @main.route('/recruiter/profile', methods=['GET', 'POST'])
@@ -318,6 +354,10 @@ def update_application_status(app_id):
 def recruiter_profile():
     if request.method == 'POST':
         current_user.full_name = request.form.get('full_name', '').strip()
+        current_user.company_name = request.form.get('company_name', '').strip()
+        current_user.company_description = request.form.get('company_description', '').strip()
+        current_user.company_location = request.form.get('company_location', '').strip()
+        current_user.company_website = request.form.get('company_website', '').strip()
         current_user.phone = request.form.get('phone', '').strip()
         current_user.address = request.form.get('address', '').strip()
         
@@ -342,21 +382,20 @@ def recruiter_profile():
 @main.route('/candidate/dashboard')
 @candidate_required
 def candidate_dashboard():
-    total_available_jobs = Job.query.count()
+    total_available_jobs = Job.query.filter_by(is_active=True).count()
     my_applications = Application.query.filter_by(candidate_id=current_user.id).all()
     
     total_applied = len(my_applications)
-    shortlisted_count = sum(1 for a in my_applications if a.status == 'Shortlisted')
+    shortlisted_count = sum(1 for a in my_applications if a.status in ['Shortlisted', 'Interview'])
     selected_count = sum(1 for a in my_applications if a.status == 'Selected')
     
-    # Calculate profile completion percentage
     profile_fields = [current_user.full_name, current_user.email, current_user.phone, 
                       current_user.address, current_user.skills, current_user.education, 
                       current_user.experience, current_user.resume_path]
     completed_fields = sum(1 for field in profile_fields if field)
     profile_completion = int((completed_fields / len(profile_fields)) * 100)
 
-    recent_jobs = Job.query.order_by(Job.created_at.desc()).limit(4).all()
+    recent_jobs = Job.query.filter_by(is_active=True).order_by(Job.created_at.desc()).limit(4).all()
     
     return render_template('candidate/dashboard.html',
                            total_available_jobs=total_available_jobs,
@@ -375,7 +414,8 @@ def browse_jobs():
     company_filter = request.args.get('company', '').strip()
     experience_filter = request.args.get('experience', '').strip()
 
-    query = Job.query
+    # Filter only active jobs for candidates
+    query = Job.query.filter_by(is_active=True)
 
     if search_query:
         query = query.filter(
@@ -395,12 +435,10 @@ def browse_jobs():
         query = query.filter(Job.experience.ilike(f'%{experience_filter}%'))
 
     jobs = query.order_by(Job.created_at.desc()).all()
-
-    # Applied job IDs for current candidate
     applied_job_ids = [app.job_id for app in Application.query.filter_by(candidate_id=current_user.id).all()]
 
-    locations = db.session.query(Job.location).distinct().all()
-    companies = db.session.query(Job.company).distinct().all()
+    locations = db.session.query(Job.location).filter_by(is_active=True).distinct().all()
+    companies = db.session.query(Job.company).filter_by(is_active=True).distinct().all()
 
     return render_template('candidate/browse_jobs.html',
                            jobs=jobs,
@@ -430,17 +468,21 @@ def job_details(job_id):
 @candidate_required
 def apply_job(job_id):
     job = Job.query.get_or_404(job_id)
+
+    if not job.is_active or job.last_date < datetime.utcnow().date():
+        flash('This job posting is currently closed or application deadline has passed.', 'danger')
+        return redirect(url_for('main.browse_jobs'))
+
     existing_app = Application.query.filter_by(candidate_id=current_user.id, job_id=job.id).first()
 
     if existing_app:
-        flash('You have already applied for this job position.', 'warning')
+        flash('You have already applied for this job.', 'warning')
         return redirect(url_for('main.my_applications'))
 
     if request.method == 'POST':
         resume_file = request.files.get('resume')
         filename_saved = None
 
-        # Check if candidate used profile resume or uploaded a new resume
         use_profile_resume = request.form.get('use_profile_resume') == 'true'
 
         if use_profile_resume and current_user.resume_path:
@@ -457,7 +499,6 @@ def apply_job(job_id):
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename_saved)
             resume_file.save(filepath)
 
-            # Update profile resume path as well
             current_user.resume_path = filename_saved
             db.session.commit()
         else:
@@ -468,7 +509,7 @@ def apply_job(job_id):
             candidate_id=current_user.id,
             job_id=job.id,
             resume=filename_saved,
-            status='Pending'
+            status='Applied'
         )
 
         db.session.add(application)

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ job.title }} at {{ job.company }} | Smart Recruitment System{% endblock %}
+{% block title %}{{ job.title }} at {{ job.display_company }} | Smart Recruitment System{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -19,7 +19,7 @@
             <div>
               <span class="badge badge-status badge-job-type mb-2">{{ job.employment_type }}</span>
               <h2 class="fw-bold text-dark mb-1">{{ job.title }}</h2>
-              <h5 class="text-primary fw-semibold mb-0"><i class="fa-solid fa-building me-2"></i> {{ job.company }}</h5>
+              <h5 class="text-primary fw-semibold mb-0"><i class="fa-solid fa-building me-2"></i> {{ job.display_company }}</h5>
             </div>
             
             {% if existing_application %}
@@ -72,7 +72,7 @@
       </div>
 
       <!-- Detailed Description -->
-      <div class="card card-corporate">
+      <div class="card card-corporate mb-4">
         <div class="card-header bg-white py-3">
           <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-align-left text-primary me-2"></i> Job Description & Requirements</h5>
         </div>
@@ -88,6 +88,36 @@
               <a href="{{ url_for('main.apply_job', job_id=job.id) }}" class="btn btn-primary px-4">
                 <i class="fa-solid fa-paper-plane me-1"></i> Submit Resume & Apply
               </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- About the Company Section -->
+      <div class="card card-corporate">
+        <div class="card-header bg-white py-3">
+          <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-building text-primary me-2"></i> About the Company</h5>
+        </div>
+        <div class="card-body p-4">
+          <h4 class="fw-bold text-dark mb-2">{{ job.display_company }}</h4>
+          
+          {% if job.recruiter and job.recruiter.company_description %}
+            <p class="text-secondary lh-base mb-3">{{ job.recruiter.company_description }}</p>
+          {% else %}
+            <p class="text-muted mb-3">{{ job.display_company }} is a leading enterprise employer hiring talented candidates.</p>
+          {% endif %}
+
+          <div class="row g-3 fs-7 border-top pt-3">
+            <div class="col-md-6">
+              <i class="fa-solid fa-location-dot text-danger me-2"></i> <strong>Location:</strong> {{ (job.recruiter and job.recruiter.company_location) or job.location }}
+            </div>
+            {% if job.recruiter and job.recruiter.company_website %}
+              <div class="col-md-6">
+                <i class="fa-solid fa-globe text-info me-2"></i> <strong>Website:</strong> 
+                <a href="{{ job.recruiter.company_website if 'http' in job.recruiter.company_website else 'http://' + job.recruiter.company_website }}" target="_blank" class="text-primary text-decoration-none">
+                  {{ job.recruiter.company_website }}
+                </a>
+              </div>
             {% endif %}
           </div>
         </div>

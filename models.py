@@ -14,6 +14,12 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False)  # 'recruiter' or 'candidate'
     
+    # Recruiter Company Profile fields
+    company_name = db.Column(db.String(200), nullable=True)
+    company_description = db.Column(db.Text, nullable=True)
+    company_location = db.Column(db.String(200), nullable=True)
+    company_website = db.Column(db.String(300), nullable=True)
+    
     # Profile fields (mainly for Candidate, optional for Recruiter)
     phone = db.Column(db.String(20), nullable=True)
     address = db.Column(db.String(255), nullable=True)
@@ -60,10 +66,18 @@ class Job(db.Model):
     skills = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
     last_date = db.Column(db.Date, nullable=False)
+    openings = db.Column(db.Integer, default=1, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
     applications = db.relationship('Application', backref='job', lazy=True, cascade="all, delete-orphan")
+
+    @property
+    def display_company(self):
+        if self.recruiter and self.recruiter.company_name:
+            return self.recruiter.company_name
+        return self.company
 
     def __repr__(self):
         return f'<Job {self.title} at {self.company}>'
@@ -76,8 +90,10 @@ class Application(db.Model):
     candidate_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     job_id = db.Column(db.Integer, db.ForeignKey('jobs.id', ondelete='CASCADE'), nullable=False)
     resume = db.Column(db.String(255), nullable=False)
-    status = db.Column(db.String(30), default='Pending', nullable=False)  # 'Pending', 'Shortlisted', 'Selected', 'Rejected'
+    status = db.Column(db.String(30), default='Applied', nullable=False)  # 'Applied', 'Under Review', 'Shortlisted', 'Interview', 'Selected', 'Rejected'
+    rejection_reason = db.Column(db.Text, nullable=True)
     applied_date = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
         db.UniqueConstraint('candidate_id', 'job_id', name='unique_candidate_job_application'),
