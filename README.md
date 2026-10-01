@@ -149,3 +149,4 @@ Open your browser and navigate to: **`http://127.0.0.1:5000`**
 - Role-based Access Control via custom Flask route decorators (`@recruiter_required`, `@candidate_required`).
 - File Upload Validation restricting formats to PDF, DOC, DOCX and setting maximum content length (10 MB). Filenames are sanitized with `secure_filename` and unique timestamp prefixes.
 "# smart_recruitment_system" 
+"# smart_recruitment_system" 
